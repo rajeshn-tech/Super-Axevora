@@ -199,3 +199,4 @@ class PixelBuffer:
         buf.data[is_win, 2] = 0.4
 
         return buf
+

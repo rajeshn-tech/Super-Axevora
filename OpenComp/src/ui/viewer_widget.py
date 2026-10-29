@@ -201,3 +201,4 @@ class ViewerWidget(QWidget):
 
     def fit_view(self):
         self.canvas.fit_view()
+

@@ -1,0 +1,21 @@
+{
+  "name": "superagent",
+  "version": "1.0.0",
+  "description": "Zero-Refusal Autonomous AI SuperAgent for Mobile & Cloudflare with Instagram Reel Auditor, Android Tools, and REA Intelligence",
+  "main": "src/index.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "dev": "node src/server.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [
+    "ai-agent",
+    "autonomous-agent",
+    "cloudflare-worker",
+    "telegram-bot",
+    "instagram-audit",
+    "android-automation"
+  ],
+  "license": "MIT"
+}

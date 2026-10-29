@@ -167,3 +167,4 @@ class GradeNode(Node):
 
         out_data = np.concatenate([rgb, src[:, :, 3:4]], axis=2)
         return PixelBuffer(w, h, out_data)
+

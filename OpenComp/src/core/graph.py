@@ -135,3 +135,4 @@ class Graph:
     def clear(self):
         self.nodes.clear()
         self.notify("graph_cleared")
+

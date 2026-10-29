@@ -21,3 +21,4 @@ if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Application exited with error.
     pause
 )
+

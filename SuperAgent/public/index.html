@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SuperAgent - 24/7 Mobile AI Commander</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-group">
+        <div class="logo-icon">⚡</div>
+        <div>
+          <h1 class="logo-title">SUPERAGENT</h1>
+          <p class="logo-sub">24/7 Cloudflare & Mobile Controller</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="status-indicator online"></span>
+        <span id="connectionStatus" class="status-text">ONLINE</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-nav">
+      <button class="nav-btn active" data-tab="chat">
+        <span class="icon">💬</span>
+        <span>Chat</span>
+      </button>
+      <button class="nav-btn" data-tab="instagram">
+        <span class="icon">📈</span>
+        <span>Reel Audit</span>
+      </button>
+      <button class="nav-btn" data-tab="android">
+        <span class="icon">🤖</span>
+        <span>Android</span>
+      </button>
+      <button class="nav-btn" data-tab="settings">
+        <span class="icon">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- Tab 1: Live Chat -->
+    <section id="tab-chat" class="tab-content active">
+      <div class="chat-container">
+        <div id="chatMessages" class="messages-list">
+          <div class="msg assistant">
+            <div class="msg-avatar">⚡</div>
+            <div class="msg-bubble">
+              <p><strong>SuperAgent Online!</strong> Zero-refusal mode active.</p>
+              <p>Bhai aap mujhse mobile ya Telegram se koi bhi task karwa sakte ho: Instagram Reels virality audit, Android free automation recipes, reverse engineering, ya technical problem solving. Batao kya karna hai?</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Prompts Chips -->
+        <div class="quick-chips">
+          <button class="chip" onclick="sendQuickPrompt('Bhai meri Instagram reel viral kyun nahi ho rahi? Audit kaise kare?')">📈 Reel Viral Kaise Kare?</button>
+          <button class="chip" onclick="sendQuickPrompt('Android phone me background task automate karne ke free tools batao')">🤖 Free Android Automations</button>
+          <button class="chip" onclick="sendQuickPrompt('Bhai mujhe bina kisi API fee ke autonomous agent chalana hai')">🆓 Free Zero-Cost Setup</button>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="chat-input-bar">
+          <textarea id="userInput" rows="1" placeholder="Type message or ask anything..." onkeydown="handleChatKey(event)"></textarea>
+          <button id="sendBtn" class="send-button" onclick="sendMessage()">
+            <span>Send</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Instagram Reel Kundali Auditor -->
+    <section id="tab-instagram" class="tab-content">
+      <div class="scroll-container">
+        <div class="card header-card">
+          <h2>📊 Instagram Reel Virality & Kundali Auditor</h2>
+          <p class="card-desc">Instagram Algorithm Reverse-Engineered: Reel ke metrics daalo aur exact retention leaks, share probability aur fixes paao.</p>
+        </div>
+
+        <form id="reelAuditForm" class="card audit-form" onsubmit="event.preventDefault(); runReelAudit();">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Views / Plays</label>
+              <input type="number" id="reelViews" value="1250" placeholder="e.g. 1500" required>
+            </div>
+            <div class="form-group">
+              <label>Shares (Algorithm Gold)</label>
+              <input type="number" id="reelShares" value="38" placeholder="e.g. 40" required>
+            </div>
+            <div class="form-group">
+              <label>Likes</label>
+              <input type="number" id="reelLikes" value="110" placeholder="e.g. 100" required>
+            </div>
+            <div class="form-group">
+              <label>Comments</label>
+              <input type="number" id="reelComments" value="14" placeholder="e.g. 15">
+            </div>
+            <div class="form-group">
+              <label>Saves / Bookmarks</label>
+              <input type="number" id="reelSaves" value="22" placeholder="e.g. 20">
+            </div>
+            <div class="form-group">
+              <label>Total Duration (Seconds)</label>
+              <input type="number" id="reelDuration" value="28" placeholder="e.g. 25" required>
+            </div>
+            <div class="form-group">
+              <label>Hook Duration (Seconds)</label>
+              <input type="number" id="reelHook" value="2.5" step="0.1" placeholder="e.g. 2.0">
+            </div>
+            <div class="form-group">
+              <label>Audio Type</label>
+              <select id="reelAudio">
+                <option value="trending" selected>🔥 Trending Audio (&lt; 10k reels)</option>
+                <option value="saturated">⚠️ Saturated Trending (&gt; 200k reels)</option>
+                <option value="original">🎙️ Original Voiceover / Music</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="action-btn primary-btn">🔍 Run Algorithmic Audit</button>
+        </form>
+
+        <!-- Audit Results Box -->
+        <div id="auditResultCard" class="card result-card hidden">
+          <div class="result-header">
+            <div>
+              <span class="badge" id="gradeBadge">A</span>
+              <h3 id="viralityStatus">High Viral Potential</h3>
+            </div>
+            <div class="score-circle">
+              <span id="scoreVal">84</span>
+              <small>/ 100</small>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <span class="m-label">Share Ratio</span>
+              <span class="m-val" id="metricShareRatio">3.04%</span>
+              <small id="shareNote" class="m-note">Target: &gt; 3%</small>
+            </div>
+            <div class="metric-box">
+              <span class="m-label">Engagement Rate</span>
+              <span class="m-val" id="metricEngagement">14.7%</span>
+              <small class="m-note">Healthy: &gt; 10%</small>
+            </div>
+            <div class="metric-box">
+              <span class="m-label">Hook Score</span>
+              <span class="m-val" id="metricHook">85%</span>
+              <small class="m-note">&lt; 3s Hook</small>
+            </div>
+          </div>
+
+          <div class="audit-section">
+            <h4>🚨 Retention & Algorithm Leaks</h4>
+            <ul id="leaksList" class="leak-list"></ul>
+          </div>
+
+          <div class="audit-section">
+            <h4>🚀 Actionable Fixes (Next Reel Plan)</h4>
+            <ul id="fixesList" class="fix-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Free Android Automation Assistant -->
+    <section id="tab-android" class="tab-content">
+      <div class="scroll-container">
+        <div class="card header-card">
+          <h2>🤖 100% Free Android Automations</h2>
+          <p class="card-desc">Zero Paid APIs. Pure open-source and free native Android automation powerhouses.</p>
+        </div>
+
+        <div class="android-tools-grid">
+          <div class="tool-card">
+            <div class="tool-icon">⚡</div>
+            <h3>MacroDroid</h3>
+            <p>Best GUI-based automation. No code needed. Triggers on SMS, location, Wi-Fi, sensors, battery, or webhooks.</p>
+            <span class="tag free">Free Tier (5 Macros)</span>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">💻</div>
+            <h3>Termux + Termux:API</h3>
+            <p>Full Linux environment directly on Android. Runs Node.js, Python, curl, cron jobs, and controls hardware via bash.</p>
+            <span class="tag open-source">100% F-Droid Open Source</span>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">🛠️</div>
+            <h3>Shizuku + ADB</h3>
+            <p>Gives root-level permissions to apps without rooting your phone. Enables wireless automation and app management.</p>
+            <span class="tag free">Free & Safe</span>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon">🌐</div>
+            <h3>SuperAgent Webhook</h3>
+            <p>Connect MacroDroid to your Cloudflare Worker URL to trigger AI analysis with every phone event!</p>
+            <span class="tag cloud">Free Edge Cloud</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📋 Ready-to-Use Automation Recipes</h3>
+          <p class="card-desc">Select a recipe to see exact setup instructions or bash scripts:</p>
+          <div class="recipe-selectors">
+            <button class="recipe-btn active" onclick="loadRecipe('termux_cron')">⏰ Termux Scheduled Cron Job</button>
+            <button class="recipe-btn" onclick="loadRecipe('macrodroid_webhook')">📲 MacroDroid ➔ Cloudflare Webhook</button>
+            <button class="recipe-btn" onclick="loadRecipe('battery_alert')">🔋 Low Battery & Security Automation</button>
+          </div>
+          <div class="code-box-wrapper">
+            <pre><code id="recipeCode"># Loading recipe...</code></pre>
+            <button class="copy-btn" onclick="copyRecipeCode()">📋 Copy Code</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Settings & Deployment -->
+    <section id="tab-settings" class="tab-content">
+      <div class="scroll-container">
+        <div class="card">
+          <h2>⚙️ SuperAgent Configuration</h2>
+          <p class="card-desc">Customize your backend endpoint, free Google AI Studio key, and Telegram Bot credentials.</p>
+
+          <div class="settings-form">
+            <div class="form-group">
+              <label>Backend API URL</label>
+              <input type="text" id="settingBackendUrl" placeholder="http://localhost:8787 or https://superagent.yourname.workers.dev">
+              <small class="hint">Use localhost if running locally, or your Cloudflare Worker URL for 24/7 mobile access.</small>
+            </div>
+
+            <div class="form-group">
+              <label>Google AI Studio Free API Key</label>
+              <input type="password" id="settingGeminiKey" placeholder="AIzaSy...">
+              <small class="hint">1,500 requests/day 100% free with BLOCK_NONE safety thresholds. Get it at aistudio.google.com</small>
+            </div>
+
+            <div class="form-group">
+              <label>Telegram Bot Token</label>
+              <input type="password" id="settingTelegramToken" placeholder="123456789:ABCdefGhIjkLmNoPqRsT...">
+              <small class="hint">Free from @BotFather on Telegram. Controls SuperAgent directly from Telegram app!</small>
+            </div>
+
+            <button class="action-btn primary-btn" onclick="saveSettings()">💾 Save Settings</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🚀 Cloudflare 24/7 Deployment Guide</h3>
+          <ol class="deploy-steps">
+            <li>Install Wrangler CLI: <code>npm install -g wrangler</code></li>
+            <li>Login with free Cloudflare account: <code>wrangler login</code></li>
+            <li>Set your Gemini secret: <code>wrangler secret put GEMINI_API_KEY</code></li>
+            <li>Deploy to Cloudflare Edge: <code>npx wrangler deploy</code></li>
+            <li>Set Telegram Webhook:
+              <code>curl -F "url=https://YOUR_WORKER_URL/telegram-webhook" https://api.telegram.org/botYOUR_TOKEN/setWebhook</code>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

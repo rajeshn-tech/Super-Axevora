@@ -134,3 +134,4 @@ class ViewerNode(Node):
             result.data[:, :, :3] = diff
 
         return result
+

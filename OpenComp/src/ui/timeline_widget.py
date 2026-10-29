@@ -116,3 +116,4 @@ class TimelineWidget(QWidget):
         if next_f > self.end_frame:
             next_f = self.start_frame
         self.set_frame(next_f)
+

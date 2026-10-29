@@ -64,3 +64,4 @@ class WriteNode(Node):
         quality = int(self.get_knob("quality", 95))
         buffer.save_to_file(path, quality=quality)
         print(f"[OpenComp] Render exported to: {path}")
+

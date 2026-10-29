@@ -83,3 +83,4 @@ class BlurNode(Node):
         blurred = img.filter(ImageFilter.GaussianBlur(radius=size))
         out_data = np.array(blurred, dtype=np.float32) / 255.0
         return PixelBuffer(buf_in.width, buf_in.height, out_data)
+

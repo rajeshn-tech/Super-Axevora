@@ -34,3 +34,4 @@ def create_node(node_type: str, custom_id: str = None, x: float = 0, y: float = 
         _counters[node_type] = count + 1
 
     return cls(custom_id, x, y)
+

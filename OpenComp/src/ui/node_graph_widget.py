@@ -343,3 +343,4 @@ class NodeGraphWidget(QGraphicsView):
             return
 
         super().keyPressEvent(event)
+

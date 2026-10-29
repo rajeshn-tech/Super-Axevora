@@ -191,3 +191,4 @@ class PropertiesWidget(QWidget):
         if path:
             path_edit.setText(path)
             self._on_knob_change(key, path)
+
