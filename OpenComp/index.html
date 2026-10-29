@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenComp - VFX Node-Based Compositing Workstation (Foundry Nuke Alternative)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Top Menu Bar -->
+  <header class="menu-bar">
+    <div class="brand">
+      <span>OpenComp</span>
+      <span class="brand-badge">v1.0 VFX</span>
+    </div>
+
+    <nav class="menu-items">
+      <div class="menu-dropdown">
+        <button class="menu-btn">File</button>
+        <div class="dropdown-content">
+          <a href="#" id="menu-new-project">New Project</a>
+          <a href="#" id="menu-open-project">Open Project (.comp)</a>
+          <a href="#" id="menu-save-project">Save Project (.comp)</a>
+          <hr />
+          <input type="file" id="file-project-open" style="display:none" accept=".comp,.json" />
+        </div>
+      </div>
+
+      <div class="menu-dropdown">
+        <button class="menu-btn">Presets (Demos)</button>
+        <div class="dropdown-content">
+          <a href="#" id="menu-preset-greenscreen">1. VFX Greenscreen Keying & BG</a>
+          <a href="#" id="menu-preset-grade">2. Cinematic Color Grade & Glow</a>
+          <a href="#" id="menu-preset-wipe">3. A/B Wipe Comparison</a>
+        </div>
+      </div>
+
+      <div class="menu-dropdown">
+        <button class="menu-btn">Help</button>
+        <div class="dropdown-content">
+          <a href="#" onclick="alert('OpenComp Nuke Hotkeys:\n\n• Tab: Open Node Quick Finder\n• 1 - 9: Connect selected node to Viewer Input\n• M: Create Merge Node\n• G: Create Grade Node\n• C: Create ColorCorrect Node\n• B: Create Blur Node\n• T: Create Transform Node\n• K: Create Keyer Node\n• R: Create Read Node\n• O: Create Roto Node\n• D: Disable / Bypass selected node\n• Del / Backspace: Delete selected node\n• F: Fit image to Viewer\n• Space: Play / Pause Timeline\n• Middle Mouse: Pan Canvas')">Hotkey Cheat Sheet</a>
+          <a href="#" onclick="alert('OpenComp is a 32-bit floating-point node-based VFX compositing software built as an open-source alternative to Foundry Nuke.')">About OpenComp</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Workspace Container -->
+  <main class="workspace-container">
+    
+    <!-- Left Stack (Viewer on top, Node Graph on bottom) -->
+    <section class="left-stack">
+
+      <!-- Viewport Panel -->
+      <div class="viewer-panel">
+        <div class="panel-toolbar" id="viewer-toolbar">
+          <div class="toolbar-group">
+            <button id="btn-view-input-1" class="btn-tool active" title="View Input 1 (Main Composite)">1</button>
+            <button id="btn-view-input-2" class="btn-tool" title="View Input 2 (Reference / Compare)">2</button>
+          </div>
+
+          <div class="toolbar-group slider-group">
+            <label>Gain/Exp:</label>
+            <input type="range" id="viewer-exposure-slider" min="-5.0" max="5.0" step="0.1" value="0.0" />
+            <span id="viewer-exposure-val">0.0</span>
+            <button id="btn-reset-exp" class="btn-reset" title="Reset Exposure">↺</button>
+          </div>
+
+          <div class="toolbar-group slider-group">
+            <label>Gamma:</label>
+            <input type="range" id="viewer-gamma-slider" min="0.2" max="3.0" step="0.05" value="1.0" />
+            <span id="viewer-gamma-val">1.0</span>
+            <button id="btn-reset-gamma" class="btn-reset" title="Reset Gamma">↺</button>
+          </div>
+
+          <div class="toolbar-group">
+            <button class="btn-channel active" data-channel="RGBA">RGBA</button>
+            <button class="btn-channel" data-channel="RED">R</button>
+            <button class="btn-channel" data-channel="GREEN">G</button>
+            <button class="btn-channel" data-channel="BLUE">B</button>
+            <button class="btn-channel" data-channel="ALPHA">A</button>
+            <button class="btn-channel" data-channel="LUMA">Luma</button>
+          </div>
+
+          <div class="toolbar-group" style="margin-left: auto;">
+            <span id="viewer-zoom-label" style="font-family: monospace; color:#999; font-size:10px;">100%</span>
+            <button id="btn-fit-view" class="btn-tool" title="Fit to View (Hotkey: F)">Fit [F]</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="viewer-canvas"></canvas>
+        </div>
+
+        <div class="info-bar" id="viewer-info-bar">
+          <span class="info-res">1920 x 1080 (32-bit Float Linear)</span>
+        </div>
+      </div>
+
+      <!-- Node Graph (DAG) Panel -->
+      <div class="node-graph-panel">
+        <div class="panel-header-tab">
+          <span class="tab-title">Node Graph (DAG)</span>
+          <span class="tab-hint">Press <kbd>Tab</kbd> to add node | <kbd>1-9</kbd> to view | <kbd>D</kbd> to disable | <kbd>Del</kbd> to delete</span>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="node-graph-canvas"></canvas>
+        </div>
+
+        <!-- Tab Node Spawner Quick Search Popup -->
+        <div id="node-search-popup" class="search-popup">
+          <div class="search-input-box">
+            <input type="text" id="node-search-input" placeholder="Type node name (e.g. Merge, Grade)..." autocomplete="off" />
+          </div>
+          <div id="node-search-results" class="search-results"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Properties Bin -->
+    <aside class="properties-panel">
+      <div class="panel-header-tab">
+        <span class="tab-title">Properties Bin</span>
+      </div>
+      <div class="properties-content" id="properties-container">
+        <!-- Dynamically populated by PropertiesUI.js -->
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Bottom Timeline & Dopesheet -->
+  <footer class="timeline-bar" id="timeline-bar">
+    <!-- Populated by TimelineUI.js -->
+  </footer>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
+
