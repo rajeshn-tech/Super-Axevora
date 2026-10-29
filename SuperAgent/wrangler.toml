@@ -12,3 +12,4 @@ compatibility_date = "2024-09-23"
 # You can set environment variables in Cloudflare Dashboard or .dev.vars
 DEFAULT_MODEL = "gemini-2.0-flash"
 FALLBACK_MODEL = "deepseek-ai/deepseek-r1"
+

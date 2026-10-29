@@ -104,7 +104,10 @@ Tab tak Instagram Reel Audit aur Android Automation tools bilkul live chal rahe 
 
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": this.apiKey
+        },
         body: JSON.stringify(payload)
       });
 
@@ -121,3 +124,4 @@ Tab tak Instagram Reel Audit aur Android Automation tools bilkul live chal rahe 
     }
   }
 }
+

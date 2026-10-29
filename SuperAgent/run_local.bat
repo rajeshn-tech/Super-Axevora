@@ -24,3 +24,4 @@ start "" "http://localhost:8787"
 
 node src\server.mjs
 pause
+
