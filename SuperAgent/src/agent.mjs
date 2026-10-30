@@ -3,8 +3,8 @@
  * Features:
  *  - Supports both .process() and .execute() for Telegram & Web
  *  - Llama-3.3-70B Flagship Priority + Anti-Loop Penalties
- *  - Live Target Header & WAF Scanner (Real Website Reverse Engineering)
- *  - Kaalvan_REA Private Repo Integration (GitHub PAT)
+ *  - Live Target Header & WAF Scanner
+ *  - Strict Hinglish Prompt Enforcement
  *  - Dual-Engine Failover (Groq -> Gemini 1.5 Flash)
  */
 
@@ -29,7 +29,7 @@ export class SuperAgentEngine {
   }
 
   /**
-   * Main Telegram Handler Entry Point (Fixes: this.agent.process is not a function)
+   * Main Telegram Handler Entry Point
    */
   async process(promptText, ...args) {
     let history = [];
@@ -68,7 +68,7 @@ export class SuperAgentEngine {
       const csp = headers["content-security-policy"] ? "CSP Present" : "Missing CSP (XSS Attack Surface)";
       const cookies = headers["set-cookie"] || "No direct cookies in header";
 
-      return `\n[LIVE REVERSE-ENGINEERING SCAN FOR ${url}]:
+      return `\n[TARGET LIVE SCAN DATA FOR ${url}]:
 - HTTP Status: ${res.status} ${res.statusText}
 - Web Server Banner: ${server}
 - CDN/WAF Protection: ${cfRay}
@@ -77,8 +77,8 @@ export class SuperAgentEngine {
 - Set-Cookie Flags: ${cookies.slice(0, 180)}
 `;
     } catch (e) {
-      return `\n[LIVE REVERSE-ENGINEERING SCAN FOR ${url}]:
-- Note: Live request timed out or was blocked by target firewall (${e.message}). Performing deep architectural threat analysis based on known domain blueprints.
+      return `\n[TARGET LIVE SCAN DATA FOR ${url}]:
+- Status: Firewall/Timeout (${e.message}). Deep architectural threat modeling active.
 `;
     }
   }
@@ -153,9 +153,9 @@ export class SuperAgentEngine {
       body: JSON.stringify({
         model: modelToUse,
         messages: messages,
-        temperature: 0.6,
-        presence_penalty: 0.4,
-        frequency_penalty: 0.4
+        temperature: 0.5,
+        presence_penalty: 0.5,
+        frequency_penalty: 0.5
       })
     });
 
@@ -195,7 +195,7 @@ export class SuperAgentEngine {
         contents: contents,
         safetySettings: GEMINI_SAFETY_SETTINGS,
         generationConfig: {
-          temperature: 0.6,
+          temperature: 0.5,
           maxOutputTokens: 2048
         }
       })
@@ -207,7 +207,7 @@ export class SuperAgentEngine {
     }
 
     const data = await response.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Bhai, process ho gaya par output empty aaya.";
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Bhai, scan ho gaya par output empty aaya.";
   }
 
   /**
@@ -216,21 +216,21 @@ export class SuperAgentEngine {
   async execute(promptText, history = []) {
     let enrichedPrompt = promptText;
 
-    // 1. Detect if prompt contains a Website or API link
+    // Detect Website or API link
     const urlMatch = promptText.match(/https?:\/\/[^\s]+/i);
     if (urlMatch) {
       const detectedUrl = urlMatch[0];
       const isSocialMedia = detectedUrl.includes("instagram.com") || detectedUrl.includes("youtube.com") || detectedUrl.includes("youtu.be");
 
       if (!isSocialMedia) {
-        // Run live reverse engineering scan on the website
         console.log("[Live Reverse Engineering Target]:", detectedUrl);
         const liveTelemetry = await this.inspectTargetUrl(detectedUrl);
-        enrichedPrompt = `${promptText}\n\n${liveTelemetry}\n(Bhai, use these real live scan findings in your reverse engineering breakdown!)`;
+        // Force the output to be pure Hinglish using Indian hacker tone
+        enrichedPrompt = `${promptText}\n\n${liveTelemetry}\n\n(ZAROORI NOTE: Upar diye gaye live scan data ka use karke seedha 100% natural desi Hinglish mein reverse engineering breakdown do. English mein gyan pelna strictly mana hai!)`;
       }
     }
 
-    // 2. Detect if private REA algorithms are requested
+    // Detect private REA algorithms request
     if (promptText.toLowerCase().includes("kaalvan") || promptText.toLowerCase().includes("algorithm")) {
       try {
         const repoData = await this.rea.inspectRepository();
@@ -242,7 +242,7 @@ export class SuperAgentEngine {
       }
     }
 
-    // 3. Execute Primary (Groq LPU) -> Secondary (Gemini)
+    // Execute Primary (Groq LPU) -> Secondary (Gemini)
     if (this.groqApiKey) {
       try {
         const groqReply = await this.executeGroq(enrichedPrompt, history);
