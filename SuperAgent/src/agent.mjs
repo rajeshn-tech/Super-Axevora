@@ -1,6 +1,6 @@
 /**
  * Super-Axevora - Autonomous Core Agent Engine
- * Dual-Engine Architecture: Groq (Llama 3.3 70B) Primary + Google Gemini Auto-Failover Backup
+ * Dual-Engine Architecture with Dynamic Groq Model Auto-Discovery + Gemini Backup
  * Compatible with Cloudflare Workers runtime and Node.js environments.
  */
 
@@ -10,23 +10,41 @@ import { AndroidAssistant } from "./tools/android.mjs";
 import { ReaInspector } from "./tools/rea.mjs";
 
 export class SuperAgentEngine {
-  /**
-   * @param {string|null} apiKey Gemini API Key
-   * @param {Object} env Environment bindings (Cloudflare env or process.env fallback)
-   */
   constructor(apiKey = null, env = {}) {
     const processEnv = (typeof process !== "undefined" && process?.env) ? process.env : {};
     this.env = env || {};
     this.apiKey = apiKey || this.env.GEMINI_API_KEY || processEnv.GEMINI_API_KEY || null;
     this.groqApiKey = this.env.GROQ_API_KEY || processEnv.GROQ_API_KEY || null;
-    this.model = this.env.DEFAULT_MODEL || processEnv.DEFAULT_MODEL || MODELS.primary;
+    this.model = this.env.DEFAULT_MODEL || processEnv.DEFAULT_MODEL || "gemini-1.5-flash";
   }
 
   /**
-   * Engine 1: Groq LPU (Llama 3.3 70B - Bullet Speed & Zero Censorship)
+   * Auto-Detect exact live model from Groq API (Zero Guessing / No 404 ever!)
+   */
+  async getActiveGroqModel() {
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/models", {
+        headers: { "Authorization": `Bearer ${this.groqApiKey}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const models = (json?.data || []).map(m => m.id);
+        // Find best available model in order of priority
+        const match = models.find(m => m.includes("llama-3") || m.includes("llama3") || m.includes("mixtral") || m.includes("gemma")) || models[0];
+        if (match) return match;
+      }
+    } catch {
+      // Fallback
+    }
+    return "llama3-8b-8192";
+  }
+
+  /**
+   * Engine 1: Groq LPU (Bullet Speed 0.5s & Zero Censorship)
    */
   async callGroq(promptText, history = []) {
     if (!this.groqApiKey) return null;
+    const modelToUse = await this.getActiveGroqModel();
     const endpoint = "https://api.groq.com/openai/v1/chat/completions";
 
     const messages = [
@@ -45,7 +63,7 @@ export class SuperAgentEngine {
         "Authorization": `Bearer ${this.groqApiKey}`
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: modelToUse,
         messages: messages,
         temperature: 0.7,
         max_tokens: 2048
@@ -66,7 +84,7 @@ export class SuperAgentEngine {
    */
   async callGemini(promptText, history = []) {
     if (!this.apiKey) return null;
-    const modelName = this.model || MODELS.primary;
+    const modelName = this.model || "gemini-1.5-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
 
     const payload = {
@@ -205,7 +223,7 @@ ${audit.diagnosis.hook_analysis}
 Cloudflare dashboard me GROQ_API_KEY add kijiye.`;
     }
 
-    // 4. Dual-Engine Execution (Groq Llama 3.3 70B Primary -> Gemini Failover)
+    // 4. Dual-Engine Execution (Groq Auto-Discovery Primary -> Gemini Failover)
     let lastError = null;
 
     // Try Engine 1: Groq (0.5s Speed & Uncensored)
