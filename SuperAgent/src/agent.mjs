@@ -1,10 +1,10 @@
 /**
  * Super-Axevora - Autonomous Core Agent Engine
  * Features:
+ *  - Supports both .process() and .execute() for Telegram & Web
  *  - Llama-3.3-70B Flagship Priority + Anti-Loop Penalties
- *  - Live Website Telemetry & WAF Scanner (Real Reverse Engineering)
+ *  - Live Target Header & WAF Scanner (Real Website Reverse Engineering)
  *  - Kaalvan_REA Private Repo Integration (GitHub PAT)
- *  - Social Media Auditor & Android Assistant Tools
  *  - Dual-Engine Failover (Groq -> Gemini 1.5 Flash)
  */
 
@@ -26,6 +26,20 @@ export class SuperAgentEngine {
     this.instagram = new InstagramAuditor();
     this.android = new AndroidAssistant();
     this.rea = new ReaInspector(this.githubToken);
+  }
+
+  /**
+   * Main Telegram Handler Entry Point (Fixes: this.agent.process is not a function)
+   */
+  async process(promptText, ...args) {
+    let history = [];
+    for (const arg of args) {
+      if (Array.isArray(arg)) {
+        history = arg;
+        break;
+      }
+    }
+    return await this.execute(promptText, history);
   }
 
   /**
