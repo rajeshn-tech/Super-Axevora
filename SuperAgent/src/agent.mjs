@@ -1,16 +1,24 @@
 /**
- * SuperAgent - Autonomous Core Agent Engine
+ * Super-Axevora - Autonomous Core Agent Engine
  * Direct Developer API caller with BLOCK_NONE safety thresholds and Tool Calling loops.
+ * Compatible with Cloudflare Workers runtime and Node.js environments.
  */
 
 import { SYSTEM_PROMPT, GEMINI_SAFETY_SETTINGS, MODELS } from "./config.mjs";
 import { InstagramAuditor } from "./tools/instagram.mjs";
 import { AndroidAssistant } from "./tools/android.mjs";
+import { ReaInspector } from "./tools/rea.mjs";
 
 export class SuperAgentEngine {
+  /**
+   * @param {string|null} apiKey Gemini API Key
+   * @param {Object} env Environment bindings (Cloudflare env or process.env fallback)
+   */
   constructor(apiKey = null, env = {}) {
-    this.apiKey = apiKey || env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || null;
-    this.env = env;
+    const processEnv = (typeof process !== "undefined" && process?.env) ? process.env : {};
+    this.env = env || {};
+    this.apiKey = apiKey || this.env.GEMINI_API_KEY || processEnv.GEMINI_API_KEY || null;
+    this.model = this.env.DEFAULT_MODEL || processEnv.DEFAULT_MODEL || MODELS.primary;
   }
 
   /**
@@ -22,12 +30,44 @@ export class SuperAgentEngine {
   async process(userMessage, history = []) {
     const textLower = userMessage.toLowerCase();
 
-    // 1. Tool Routing: Instagram Reel & Growth Diagnosis
-    if (textLower.includes("instagram") || textLower.includes("reel") || textLower.includes("viral") || textLower.includes("kundali")) {
+    // 0. Auto-Detect Instagram, YouTube, or Website links for 2-in-1 Reverse Engineering
+    let promptToSend = userMessage;
+    const urlMatch = userMessage.match(/https?:\/\/[^\s]+/i);
+    const isDirectLink = Boolean(urlMatch);
+
+    if (isDirectLink) {
+      const targetUrl = urlMatch[0];
+      const isIg = targetUrl.includes("instagram.com");
+      const isYt = targetUrl.includes("youtube.com") || targetUrl.includes("youtu.be");
+      const typeName = isIg ? "Instagram Link" : isYt ? "YouTube Video/Short" : "Website / Social Media URL";
+
+      promptToSend = `Target Link: ${targetUrl} (${typeName})
+
+Perform a rigorous 2-part tactical reverse-engineering analysis:
+PART 1: [KUNDALI & REVERSE-ENGINEERING AUDIT]
+• Post anatomy, hook retention psychology, estimated watch-time physics.
+• Audio virality saturation check (fresh vs saturated) and explore algorithm signals.
+• Root-cause analysis: Why this content either blew up or flatlined.
+
+PART 2: [10X WINNING BLUEPRINT]
+• 3 actionable steps to make an improved, superior version.
+• The exact winning hook script & visual pacing formula.
+• Algorithm ranking trigger hacks (share-to-view ratio, loop multipliers, CTR).
+
+User query context: ${userMessage}`;
+    }
+
+    // 1. Tool Routing: Manual Reel Numbers Audit (Only if NOT a direct URL)
+    const isReelQuery = !isDirectLink && (
+      textLower.includes("reel") || textLower.includes("viral") || textLower.includes("kundali") ||
+      (textLower.includes("instagram") && (textLower.includes("audit") || textLower.includes("reach") || textLower.includes("view") || textLower.includes("share")))
+    );
+
+    if (isReelQuery) {
       const numbers = userMessage.match(/\d+/g) || [];
-      const views = numbers[0] ? parseInt(numbers[0]) : 1200;
-      const shares = numbers[1] ? parseInt(numbers[1]) : 18;
-      const likes = numbers[2] ? parseInt(numbers[2]) : 85;
+      const views = numbers[0] ? parseInt(numbers[0], 10) : 1200;
+      const shares = numbers[1] ? parseInt(numbers[1], 10) : 18;
+      const likes = numbers[2] ? parseInt(numbers[2], 10) : 85;
 
       const audit = InstagramAuditor.auditReel({
         url: userMessage,
@@ -57,7 +97,12 @@ ${audit.diagnosis.hook_analysis}
     }
 
     // 2. Tool Routing: Android Assistants & Automation
-    if (textLower.includes("android") || textLower.includes("assistant") || textLower.includes("phone") || textLower.includes("automation") || textLower.includes("macrodroid") || textLower.includes("tasker")) {
+    const isAutomationQuery = !isDirectLink && (
+      textLower.includes("macrodroid") || textLower.includes("tasker") || textLower.includes("termux:api") ||
+      ((textLower.includes("automation") || textLower.includes("assistant")) && (textLower.includes("android") || textLower.includes("phone")))
+    );
+
+    if (isAutomationQuery) {
       const recipes = AndroidAssistant.getAutomationRecipe("list_all");
       return `📱 **Android Ke Top Free Assistants & Automation Systems (Zero API Key):**
 
@@ -76,21 +121,20 @@ ${audit.diagnosis.hook_analysis}
 *Aapko phone me kis task ka automation karwana hai? Batayein, main ready-to-run script ya MacroDroid recipe de dunga.*`;
     }
 
-    // 3. Fallback: If no API key configured yet, provide crisp built-in intelligence
+    // 3. Fallback: If no API key configured yet
     if (!this.apiKey) {
-      return `Bhai SuperAgent ready hai! Lekin abhi \`GEMINI_API_KEY\` set nahi hai. 
-Aap \`https://aistudio.google.com\` se apni 100% Free API key generate karke \`.env\` me paste kar dijiye taaki general deep thinking enable ho jaye!
-
-Tab tak Instagram Reel Audit aur Android Automation tools bilkul live chal rahe hain!`;
+      return `⚡ Super-Axevora ready hai! Lekin abhi \`GEMINI_API_KEY\` set nahi hai. 
+Aap \`https://aistudio.google.com\` se apni 100% Free API key generate karke Cloudflare secrets (\`wrangler secret put GEMINI_API_KEY\`) ya local \`.env\` me paste kar dijiye.`;
     }
 
     // 4. Direct Google AI Studio API Call with BLOCK_NONE safety thresholds
     try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODELS.primary}:generateContent?key=${this.apiKey}`;
+      const modelName = this.model || MODELS.primary;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
       const payload = {
         contents: [
           ...history,
-          { role: "user", parts: [{ text: userMessage }] }
+          { role: "user", parts: [{ text: promptToSend }] }
         ],
         systemInstruction: {
           parts: [{ text: SYSTEM_PROMPT }]
@@ -120,8 +164,7 @@ Tab tak Instagram Reel Audit aur Android Automation tools bilkul live chal rahe 
       const answer = result?.candidates?.[0]?.content?.parts?.[0]?.text;
       return answer || "No response generated.";
     } catch (err) {
-      return `[SuperAgent Execution Error]: ${err.message}`;
+      return `[Super-Axevora Execution Error]: ${err.message}`;
     }
   }
 }
-

@@ -3,9 +3,22 @@
  * Connects to Cloudflare Worker or Local Node.js server.
  */
 
-// State
-let backendUrl = localStorage.getItem("superagent_backend") || window.location.origin;
-if (backendUrl.endsWith("/")) backendUrl = backendUrl.slice(0, -1);
+// Clean up any legacy secrets previously stored in browser localStorage
+try {
+  localStorage.removeItem("superagent_gemini_key");
+  localStorage.removeItem("superagent_telegram_token");
+} catch (e) {}
+
+// Same-origin backend URL by default, with support for custom origin override
+function getBackendOrigin() {
+  const origin = window.location.origin;
+  if (origin && origin !== "null" && !origin.startsWith("file:")) {
+    return origin.replace(/\/+$/, "");
+  }
+  return localStorage.getItem("superagent_backend") || "";
+}
+
+let backendUrl = getBackendOrigin();
 let conversationHistory = [];
 
 const RECIPES = {
@@ -27,19 +40,6 @@ chmod +x ~/audit_battery.sh
 crond
 termux-wake-lock`,
 
-  macrodroid_webhook: `// MacroDroid Trigger:
-1. Trigger: Regular Interval (Every 1 Hour) OR SMS Received OR Wi-Fi Disconnected
-2. Action: HTTP Request
-   - Method: POST
-   - URL: ${backendUrl}/api/chat
-   - Content Type: application/json
-   - Request Body:
-     {
-       "message": "Phone event triggered: battery={battery} wifi={wifi_ssid}"
-     }
-3. Action: Notification
-   - Show SuperAgent response from [http_response]`,
-
   battery_alert: `# Background Power Optimization via ADB / Termux:
 # Disable battery throttling for your essential agent scripts:
 dumpsys deviceidle whitelist +com.termux
@@ -48,6 +48,25 @@ dumpsys deviceidle whitelist +com.termux
 nohup termux-wake-lock &
 echo "SuperAgent local daemon active in background!"`
 };
+
+function getRecipeCode(key) {
+  if (key === "macrodroid_webhook") {
+    const origin = backendUrl || window.location.origin || "https://super-axevora.<your-subdomain>.workers.dev";
+    return `// MacroDroid Trigger:
+1. Trigger: Regular Interval (Every 1 Hour) OR SMS Received OR Wi-Fi Disconnected
+2. Action: HTTP Request
+   - Method: POST
+   - URL: ${origin}/api/chat
+   - Content Type: application/json
+   - Request Body:
+     {
+       "message": "Phone event triggered: battery={battery} wifi={wifi_ssid}"
+     }
+3. Action: Notification
+   - Show SuperAgent response from [http_response]`;
+  }
+  return RECIPES[key] || "# Recipe not found";
+}
 
 // DOM Elements
 document.addEventListener("DOMContentLoaded", () => {
@@ -77,19 +96,47 @@ function initNavigation() {
 async function checkHealth() {
   const statusEl = document.getElementById("connectionStatus");
   const indEl = document.querySelector(".status-indicator");
+  const geminiStatusEl = document.getElementById("backendGeminiStatus");
+  const telegramStatusEl = document.getElementById("backendTelegramStatus");
+
   try {
     const res = await fetch(`${backendUrl}/api/health`);
     if (res.ok) {
-      statusEl.textContent = "ONLINE";
-      statusEl.style.color = "var(--accent-green)";
-      indEl.style.backgroundColor = "var(--accent-green)";
+      const data = await res.json();
+      if (statusEl) {
+        statusEl.textContent = "ONLINE";
+        statusEl.style.color = "var(--accent-green)";
+      }
+      if (indEl) {
+        indEl.style.backgroundColor = "var(--accent-green)";
+      }
+      if (geminiStatusEl) {
+        geminiStatusEl.textContent = data.geminiConfigured ? "Configured (Server-Side Secret)" : "Not Configured";
+        geminiStatusEl.style.color = data.geminiConfigured ? "var(--accent-green)" : "var(--accent-orange)";
+      }
+      if (telegramStatusEl) {
+        telegramStatusEl.textContent = data.telegramConfigured ? "Configured (Server-Side Secret)" : "Not Configured";
+        telegramStatusEl.style.color = data.telegramConfigured ? "var(--accent-green)" : "var(--accent-orange)";
+      }
     } else {
-      throw new Error();
+      throw new Error(`HTTP ${res.status}`);
     }
   } catch (e) {
-    statusEl.textContent = "LOCAL / CACHED";
-    statusEl.style.color = "var(--accent-orange)";
-    indEl.style.backgroundColor = "var(--accent-orange)";
+    if (statusEl) {
+      statusEl.textContent = "OFFLINE";
+      statusEl.style.color = "var(--accent-orange)";
+    }
+    if (indEl) {
+      indEl.style.backgroundColor = "var(--accent-orange)";
+    }
+    if (geminiStatusEl) {
+      geminiStatusEl.textContent = "Unknown (Backend unreachable)";
+      geminiStatusEl.style.color = "var(--text-muted)";
+    }
+    if (telegramStatusEl) {
+      telegramStatusEl.textContent = "Unknown (Backend unreachable)";
+      telegramStatusEl.style.color = "var(--text-muted)";
+    }
   }
 }
 
@@ -119,7 +166,7 @@ async function sendMessage() {
     const data = await res.json();
     removeMessage(typingId);
 
-    if (data.status === "success" && data.reply) {
+    if (res.ok && data.status === "success" && data.reply) {
       appendMessage("assistant", data.reply);
       conversationHistory.push({ role: "user", parts: [{ text }] });
       conversationHistory.push({ role: "model", parts: [{ text: data.reply }] });
@@ -128,7 +175,7 @@ async function sendMessage() {
     }
   } catch (err) {
     removeMessage(typingId);
-    appendMessage("assistant", `⚡ [Local Fallback Response]: Bhai server se connection me thodi rukawat hai. Agar aapne \`npm start\` chalaya hai ya Cloudflare worker deploy kiya hai to settings me URL check karein.\n\nAapka sawal: "${text}" note kar liya hai!`);
+    appendMessage("assistant", `⚡ [Local Fallback Response]: Server se connection me thodi rukawat hai. Agar aapne local server chalaya hai ya Cloudflare Worker deploy kiya hai to settings me URL check karein.\n\nAapka sawal: "${text}" note kar liya hai!`);
   }
 }
 
@@ -220,6 +267,7 @@ async function runReelAudit() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const report = await res.json();
     renderAuditResult(report);
   } catch (err) {
@@ -284,10 +332,14 @@ function renderAuditResult(report) {
 function loadRecipe(key) {
   const buttons = document.querySelectorAll(".recipe-btn");
   buttons.forEach(b => b.classList.remove("active"));
-  event?.target?.classList?.add("active");
+  if (event && event.target && event.target.classList) {
+    event.target.classList.add("active");
+  }
 
   const codeEl = document.getElementById("recipeCode");
-  codeEl.textContent = RECIPES[key] || "# Recipe not found";
+  if (codeEl) {
+    codeEl.textContent = getRecipeCode(key);
+  }
 }
 
 function copyRecipeCode() {
@@ -300,28 +352,24 @@ function copyRecipeCode() {
 // Settings
 function initSettings() {
   const urlInput = document.getElementById("settingBackendUrl");
-  urlInput.value = backendUrl;
-
-  const keyInput = document.getElementById("settingGeminiKey");
-  keyInput.value = localStorage.getItem("superagent_gemini_key") || "";
-
-  const tokenInput = document.getElementById("settingTelegramToken");
-  tokenInput.value = localStorage.getItem("superagent_telegram_token") || "";
+  if (urlInput) {
+    urlInput.value = backendUrl || window.location.origin;
+  }
 }
 
 function saveSettings() {
-  const url = document.getElementById("settingBackendUrl").value.trim();
-  const key = document.getElementById("settingGeminiKey").value.trim();
-  const token = document.getElementById("settingTelegramToken").value.trim();
-
-  if (url) {
-    backendUrl = url.replace(/\/+$/, "");
-    localStorage.setItem("superagent_backend", backendUrl);
+  const urlInput = document.getElementById("settingBackendUrl");
+  if (urlInput) {
+    const customUrl = urlInput.value.trim().replace(/\/+$/, "");
+    if (customUrl) {
+      backendUrl = customUrl;
+      localStorage.setItem("superagent_backend", backendUrl);
+    } else {
+      backendUrl = getBackendOrigin();
+      localStorage.removeItem("superagent_backend");
+    }
   }
-  if (key) localStorage.setItem("superagent_gemini_key", key);
-  if (token) localStorage.setItem("superagent_telegram_token", token);
 
-  alert("Settings saved successfully!");
+  alert("Settings updated successfully!");
   checkHealth();
 }
-

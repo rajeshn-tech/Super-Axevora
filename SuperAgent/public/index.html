@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0d1117">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>SuperAgent - 24/7 Mobile AI Commander</title>
+  <title>AxevoraSuperAgent - 24/7 Mobile AI Commander</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
   <div id="app">
     <!-- Header -->
@@ -19,7 +23,7 @@
       <div class="logo-group">
         <div class="logo-icon">⚡</div>
         <div>
-          <h1 class="logo-title">SUPERAGENT</h1>
+          <h1 class="logo-title">AXEVORA-SUPERAGENT</h1>
           <p class="logo-sub">24/7 Cloudflare & Mobile Controller</p>
         </div>
       </div>
@@ -57,24 +61,35 @@
             <div class="msg-avatar">⚡</div>
             <div class="msg-bubble">
               <p><strong>SuperAgent Online!</strong> Zero-refusal mode active.</p>
-              <p>Bhai aap mujhse mobile ya Telegram se koi bhi task karwa sakte ho: Instagram Reels virality audit, Android free automation recipes, reverse engineering, ya technical problem solving. Batao kya karna hai?</p>
+              <p>Bhai aap mujhse mobile ya Telegram se koi bhi task karwa sakte ho: Instagram Reels virality audit,
+                Android free automation recipes, reverse engineering, ya technical problem solving. Batao kya karna hai?
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Quick Prompts Chips -->
         <div class="quick-chips">
-          <button class="chip" onclick="sendQuickPrompt('Bhai meri Instagram reel viral kyun nahi ho rahi? Audit kaise kare?')">📈 Reel Viral Kaise Kare?</button>
-          <button class="chip" onclick="sendQuickPrompt('Android phone me background task automate karne ke free tools batao')">🤖 Free Android Automations</button>
-          <button class="chip" onclick="sendQuickPrompt('Bhai mujhe bina kisi API fee ke autonomous agent chalana hai')">🆓 Free Zero-Cost Setup</button>
+          <button class="chip"
+            onclick="sendQuickPrompt('Bhai meri Instagram reel viral kyun nahi ho rahi? Audit kaise kare?')">📈 Reel
+            Viral Kaise Kare?</button>
+          <button class="chip"
+            onclick="sendQuickPrompt('Android phone me background task automate karne ke free tools batao')">🤖 Free
+            Android Automations</button>
+          <button class="chip"
+            onclick="sendQuickPrompt('Bhai mujhe bina kisi API fee ke autonomous agent chalana hai')">🆓 Free Zero-Cost
+            Setup</button>
         </div>
 
         <!-- Chat Input Bar -->
         <div class="chat-input-bar">
-          <textarea id="userInput" rows="1" placeholder="Type message or ask anything..." onkeydown="handleChatKey(event)"></textarea>
+          <textarea id="userInput" rows="1" placeholder="Type message or ask anything..."
+            onkeydown="handleChatKey(event)"></textarea>
           <button id="sendBtn" class="send-button" onclick="sendMessage()">
             <span>Send</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
           </button>
         </div>
       </div>
@@ -85,7 +100,8 @@
       <div class="scroll-container">
         <div class="card header-card">
           <h2>📊 Instagram Reel Virality & Kundali Auditor</h2>
-          <p class="card-desc">Instagram Algorithm Reverse-Engineered: Reel ke metrics daalo aur exact retention leaks, share probability aur fixes paao.</p>
+          <p class="card-desc">Instagram Algorithm Reverse-Engineered: Reel ke metrics daalo aur exact retention leaks,
+            share probability aur fixes paao.</p>
         </div>
 
         <form id="reelAuditForm" class="card audit-form" onsubmit="event.preventDefault(); runReelAudit();">
@@ -186,19 +202,22 @@
           <div class="tool-card">
             <div class="tool-icon">⚡</div>
             <h3>MacroDroid</h3>
-            <p>Best GUI-based automation. No code needed. Triggers on SMS, location, Wi-Fi, sensors, battery, or webhooks.</p>
+            <p>Best GUI-based automation. No code needed. Triggers on SMS, location, Wi-Fi, sensors, battery, or
+              webhooks.</p>
             <span class="tag free">Free Tier (5 Macros)</span>
           </div>
           <div class="tool-card">
             <div class="tool-icon">💻</div>
             <h3>Termux + Termux:API</h3>
-            <p>Full Linux environment directly on Android. Runs Node.js, Python, curl, cron jobs, and controls hardware via bash.</p>
+            <p>Full Linux environment directly on Android. Runs Node.js, Python, curl, cron jobs, and controls hardware
+              via bash.</p>
             <span class="tag open-source">100% F-Droid Open Source</span>
           </div>
           <div class="tool-card">
             <div class="tool-icon">🛠️</div>
             <h3>Shizuku + ADB</h3>
-            <p>Gives root-level permissions to apps without rooting your phone. Enables wireless automation and app management.</p>
+            <p>Gives root-level permissions to apps without rooting your phone. Enables wireless automation and app
+              management.</p>
             <span class="tag free">Free & Safe</span>
           </div>
           <div class="tool-card">
@@ -214,8 +233,10 @@
           <p class="card-desc">Select a recipe to see exact setup instructions or bash scripts:</p>
           <div class="recipe-selectors">
             <button class="recipe-btn active" onclick="loadRecipe('termux_cron')">⏰ Termux Scheduled Cron Job</button>
-            <button class="recipe-btn" onclick="loadRecipe('macrodroid_webhook')">📲 MacroDroid ➔ Cloudflare Webhook</button>
-            <button class="recipe-btn" onclick="loadRecipe('battery_alert')">🔋 Low Battery & Security Automation</button>
+            <button class="recipe-btn" onclick="loadRecipe('macrodroid_webhook')">📲 MacroDroid ➔ Cloudflare
+              Webhook</button>
+            <button class="recipe-btn" onclick="loadRecipe('battery_alert')">🔋 Low Battery & Security
+              Automation</button>
           </div>
           <div class="code-box-wrapper">
             <pre><code id="recipeCode"># Loading recipe...</code></pre>
@@ -230,25 +251,36 @@
       <div class="scroll-container">
         <div class="card">
           <h2>⚙️ SuperAgent Configuration</h2>
-          <p class="card-desc">Customize your backend endpoint, free Google AI Studio key, and Telegram Bot credentials.</p>
+          <p class="card-desc">Backend endpoint and server-side credentials status.</p>
 
           <div class="settings-form">
             <div class="form-group">
               <label>Backend API URL</label>
-              <input type="text" id="settingBackendUrl" placeholder="http://localhost:8787 or https://superagent.yourname.workers.dev">
-              <small class="hint">Use localhost if running locally, or your Cloudflare Worker URL for 24/7 mobile access.</small>
+              <input type="text" id="settingBackendUrl"
+                placeholder="Same-origin by default (e.g. window.location.origin)">
+              <small class="hint">Defaults to the current origin. Leave blank or use your Cloudflare Worker URL.</small>
             </div>
 
             <div class="form-group">
-              <label>Google AI Studio Free API Key</label>
-              <input type="password" id="settingGeminiKey" placeholder="AIzaSy...">
-              <small class="hint">1,500 requests/day 100% free with BLOCK_NONE safety thresholds. Get it at aistudio.google.com</small>
+              <label>Google Gemini API Key Status</label>
+              <div
+                style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <span id="backendGeminiStatus"
+                  style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Checking...</span>
+              </div>
+              <small class="hint">Secured on server via Cloudflare Secret (<code>GEMINI_API_KEY</code>) or local
+                <code>.env</code>. Never stored in browser.</small>
             </div>
 
             <div class="form-group">
-              <label>Telegram Bot Token</label>
-              <input type="password" id="settingTelegramToken" placeholder="123456789:ABCdefGhIjkLmNoPqRsT...">
-              <small class="hint">Free from @BotFather on Telegram. Controls SuperAgent directly from Telegram app!</small>
+              <label>Telegram Bot Token Status</label>
+              <div
+                style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <span id="backendTelegramStatus"
+                  style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Checking...</span>
+              </div>
+              <small class="hint">Secured on server via Cloudflare Secret (<code>TELEGRAM_BOT_TOKEN</code>) or local
+                <code>.env</code>. Never stored in browser.</small>
             </div>
 
             <button class="action-btn primary-btn" onclick="saveSettings()">💾 Save Settings</button>
@@ -259,11 +291,13 @@
           <h3>🚀 Cloudflare 24/7 Deployment Guide</h3>
           <ol class="deploy-steps">
             <li>Install Wrangler CLI: <code>npm install -g wrangler</code></li>
-            <li>Login with free Cloudflare account: <code>wrangler login</code></li>
-            <li>Set your Gemini secret: <code>wrangler secret put GEMINI_API_KEY</code></li>
+            <li>Login with free Cloudflare account: <code>npx wrangler login</code></li>
+            <li>Set Gemini API secret: <code>npx wrangler secret put GEMINI_API_KEY</code></li>
+            <li>Set Telegram Bot Token secret: <code>npx wrangler secret put TELEGRAM_BOT_TOKEN</code></li>
+            <li>Set Telegram Webhook Secret: <code>npx wrangler secret put TELEGRAM_WEBHOOK_SECRET</code></li>
             <li>Deploy to Cloudflare Edge: <code>npx wrangler deploy</code></li>
-            <li>Set Telegram Webhook:
-              <code>curl -F "url=https://YOUR_WORKER_URL/telegram-webhook" https://api.telegram.org/botYOUR_TOKEN/setWebhook</code>
+            <li>Register Telegram Webhook:
+              <code>curl -F "url=https://super-axevora.&lt;subdomain&gt;.workers.dev/telegram-webhook" -F "secret_token=YOUR_WEBHOOK_SECRET" https://api.telegram.org/botYOUR_TOKEN/setWebhook</code>
             </li>
           </ol>
         </div>
@@ -273,5 +307,5 @@
 
   <script src="app.js"></script>
 </body>
-</html>
 
+</html>

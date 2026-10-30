@@ -1,6 +1,11 @@
-name = "superagent"
+name = "super-axevora"
 main = "src/index.mjs"
 compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
 
 # Cloudflare D1 Database binding for persistent memory (optional, enabled when configured)
 # [[d1_databases]]
@@ -9,7 +14,6 @@ compatibility_date = "2024-09-23"
 # database_id = "your-database-id"
 
 [vars]
-# You can set environment variables in Cloudflare Dashboard or .dev.vars
+# Non-secret environment variables (secrets must be set via wrangler secret put)
 DEFAULT_MODEL = "gemini-2.0-flash"
 FALLBACK_MODEL = "deepseek-ai/deepseek-r1"
-

@@ -19,7 +19,7 @@ export const GEMINI_SAFETY_SETTINGS = [
 ];
 
 export const MODELS = {
-  primary: "gemini-3.5-flash-lite",
-  pro: "gemini-3.8-flash",
+  primary: "gemini-2.0-flash",
+  pro: "gemini-2.0-flash",
   fallback_open: "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"
 };
