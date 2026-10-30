@@ -19,7 +19,7 @@ export class SuperAgentEngine {
   }
 
   /**
-   * Auto-Detect exact live text model from Groq API (Filters out audio/specialty models)
+   * Auto-Detect exact live text model from Groq API (Filters out audio, whisper, and guard models)
    */
   async getActiveGroqModel() {
     try {
@@ -29,18 +29,19 @@ export class SuperAgentEngine {
       if (res.ok) {
         const json = await res.json();
         const models = (json?.data || []).map(m => m.id);
-        console.log("[Groq All Models]:", JSON.stringify(models));
 
-        // Filter out audio, whisper, tts, and specialty models
+        // Filter out audio, whisper, tts, vision, and llama-guard models
         const textModels = models.filter(m =>
           !m.includes("whisper") &&
           !m.includes("orpheus") &&
           !m.includes("canopylabs") &&
           !m.includes("tts") &&
-          !m.includes("embed")
+          !m.includes("embed") &&
+          !m.includes("guard") &&
+          !m.includes("moderation")
         );
 
-        // Pick best text/chat model
+        // Pick best text/chat model (Llama 3.x, DeepSeek, Mixtral, Gemma)
         const match = textModels.find(m =>
           m.includes("llama") ||
           m.includes("deepseek") ||
@@ -49,12 +50,11 @@ export class SuperAgentEngine {
         ) || textModels[0];
 
         if (match) {
-          console.log("[Groq Selected Text Model]:", match);
           return match;
         }
       }
-    } catch (e) {
-      console.warn("Failed to fetch Groq models list:", e);
+    } catch {
+      // Fallback
     }
     return "mixtral-8x7b-32768";
   }
@@ -85,8 +85,7 @@ export class SuperAgentEngine {
       body: JSON.stringify({
         model: modelToUse,
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 2048
+        temperature: 0.7
       })
     });
 
