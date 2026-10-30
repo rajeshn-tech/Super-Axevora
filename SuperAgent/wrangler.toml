@@ -7,6 +7,10 @@ compatibility_flags = ["nodejs_compat"]
 directory = "./public"
 binding = "ASSETS"
 
+[observability.logs]
+enabled = true
+invocation_logs = true
+
 # Cloudflare D1 Database binding for persistent memory (optional, enabled when configured)
 # [[d1_databases]]
 # binding = "DB"
@@ -15,5 +19,5 @@ binding = "ASSETS"
 
 [vars]
 # Non-secret environment variables (secrets must be set via wrangler secret put)
-DEFAULT_MODEL = "gemini-2.0-flash"
+DEFAULT_MODEL = "gemini-3.8-flash"
 FALLBACK_MODEL = "deepseek-ai/deepseek-r1"
