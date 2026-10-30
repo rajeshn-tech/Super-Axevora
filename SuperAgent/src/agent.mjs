@@ -1,6 +1,6 @@
 /**
  * Super-Axevora - Autonomous Core Agent Engine
- * Direct Developer API caller with BLOCK_NONE safety thresholds and Tool Calling loops.
+ * Dual-Engine Architecture: Groq (Llama 3.3 70B) Primary + Google Gemini Auto-Failover Backup
  * Compatible with Cloudflare Workers runtime and Node.js environments.
  */
 
@@ -18,14 +18,92 @@ export class SuperAgentEngine {
     const processEnv = (typeof process !== "undefined" && process?.env) ? process.env : {};
     this.env = env || {};
     this.apiKey = apiKey || this.env.GEMINI_API_KEY || processEnv.GEMINI_API_KEY || null;
+    this.groqApiKey = this.env.GROQ_API_KEY || processEnv.GROQ_API_KEY || null;
     this.model = this.env.DEFAULT_MODEL || processEnv.DEFAULT_MODEL || MODELS.primary;
   }
 
   /**
+   * Engine 1: Groq LPU (Llama 3.3 70B - Bullet Speed & Zero Censorship)
+   */
+  async callGroq(promptText, history = []) {
+    if (!this.groqApiKey) return null;
+    const endpoint = "https://api.groq.com/openai/v1/chat/completions";
+
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...history.map(h => ({
+        role: h.role === "model" ? "assistant" : h.role,
+        content: h.parts?.[0]?.text || h.content || ""
+      })),
+      { role: "user", content: promptText }
+    ];
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${this.groqApiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 2048
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Groq HTTP ${response.status}: ${err}`);
+    }
+
+    const data = await response.json();
+    return data?.choices?.[0]?.message?.content || null;
+  }
+
+  /**
+   * Engine 2: Google Gemini (Backup Failover)
+   */
+  async callGemini(promptText, history = []) {
+    if (!this.apiKey) return null;
+    const modelName = this.model || MODELS.primary;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
+
+    const payload = {
+      contents: [
+        ...history,
+        { role: "user", parts: [{ text: promptText }] }
+      ],
+      systemInstruction: {
+        parts: [{ text: SYSTEM_PROMPT }]
+      },
+      safetySettings: GEMINI_SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2048
+      }
+    };
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": this.apiKey
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Gemini HTTP ${response.status}: ${err}`);
+    }
+
+    const result = await response.json();
+    return result?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  }
+
+  /**
    * Main interaction entrypoint
-   * @param {string} userMessage 
-   * @param {Array} history 
-   * @returns {Promise<string>}
    */
   async process(userMessage, history = []) {
     const textLower = userMessage.toLowerCase();
@@ -121,50 +199,37 @@ ${audit.diagnosis.hook_analysis}
 *Aapko phone me kis task ka automation karwana hai? Batayein, main ready-to-run script ya MacroDroid recipe de dunga.*`;
     }
 
-    // 3. Fallback: If no API key configured yet
-    if (!this.apiKey) {
-      return `⚡ Super-Axevora ready hai! Lekin abhi \`GEMINI_API_KEY\` set nahi hai. 
-Aap \`https://aistudio.google.com\` se apni 100% Free API key generate karke Cloudflare secrets (\`wrangler secret put GEMINI_API_KEY\`) ya local \`.env\` me paste kar dijiye.`;
+    // 3. Fallback: Check if at least one API key is present
+    if (!this.groqApiKey && !this.apiKey) {
+      return `⚡ Super-Axevora ready hai! Lekin abhi \`GROQ_API_KEY\` ya \`GEMINI_API_KEY\` set nahi hai.
+Cloudflare dashboard me GROQ_API_KEY add kijiye.`;
     }
 
-    // 4. Direct Google AI Studio API Call with BLOCK_NONE safety thresholds
-    try {
-      const modelName = this.model || MODELS.primary;
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
-      const payload = {
-        contents: [
-          ...history,
-          { role: "user", parts: [{ text: promptToSend }] }
-        ],
-        systemInstruction: {
-          parts: [{ text: SYSTEM_PROMPT }]
-        },
-        safetySettings: GEMINI_SAFETY_SETTINGS,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048
-        }
-      };
+    // 4. Dual-Engine Execution (Groq Llama 3.3 70B Primary -> Gemini Failover)
+    let lastError = null;
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        return `API Error (${response.status}): ${errText}`;
+    // Try Engine 1: Groq (0.5s Speed & Uncensored)
+    if (this.groqApiKey) {
+      try {
+        const groqAnswer = await this.callGroq(promptToSend, history);
+        if (groqAnswer) return groqAnswer;
+      } catch (err) {
+        console.warn("[Groq Error, switching to Gemini]:", err.message);
+        lastError = `Groq Error: ${err.message}`;
       }
-
-      const result = await response.json();
-      const answer = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-      return answer || "No response generated.";
-    } catch (err) {
-      return `[Super-Axevora Execution Error]: ${err.message}`;
     }
+
+    // Try Engine 2: Gemini (Backup)
+    if (this.apiKey) {
+      try {
+        const geminiAnswer = await this.callGemini(promptToSend, history);
+        if (geminiAnswer) return geminiAnswer;
+      } catch (err) {
+        console.error("[Gemini Error]:", err.message);
+        lastError = `Gemini Error: ${err.message}`;
+      }
+    }
+
+    return `[Super-Axevora Execution Error]: ${lastError || "Both Groq and Gemini failed."}`;
   }
 }
